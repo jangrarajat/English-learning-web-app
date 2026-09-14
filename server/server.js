@@ -1,6 +1,13 @@
 import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import express from 'express';
 import app from './src/app.js';
 import { connectDB } from './src/config/database.js';
+
+// ==================== ES Modules __dirname Polyfill ====================
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // ==================== Load Environment Variables ====================
 dotenv.config();
@@ -8,6 +15,21 @@ dotenv.config();
 // ==================== Get Port from Environment ====================
 const PORT = process.env.PORT || 5000;
 const NODE_ENV = process.env.NODE_ENV || 'development';
+
+// ==================== Frontend Static Files Setup ====================
+const frontendDistPath = path.join(__dirname, '../client/dist'); 
+
+// Express ko static files serve karne ke liye configure karein
+app.use(express.static(frontendDistPath));
+
+// React Router / SPA ke liye catch-all route (Using RegExp to prevent path-to-regexp errors)
+app.get(/(.*)/, (req, res) => {
+  res.sendFile(path.join(frontendDistPath, 'index.html'), (err) => {
+    if (err) {
+      res.status(500).send(err);
+    }
+  });
+});
 
 // ==================== Start Server Function ====================
 const startServer = async () => {

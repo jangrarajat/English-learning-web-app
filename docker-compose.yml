@@ -1,0 +1,70 @@
+ server:
+    image: jangrarajat/raahi:latest
+    container_name: raahi-server
+    ports:
+      - "8000:8000"
+    volumes: 
+      - rahi-e-commers:/app/data 
+    environment:
+       - MONGODB_URL=mongodb://mongo:27017/Raahi-E-Commers
+       - SECRET_KEY=your_secret_value
+       - ACCESS_TOKEN_EXPIR=15M
+       - ACCESS_TOKEN_SECRET=!@
+       - CLOUDINARY_API_KEY=939931434461552
+       - CLOUDINARY_API_SECRET=sNvjU9fmH7_pmity_CcPiURbsnY
+       - CLOUDINARY_CLOUD_NAME=dfqsa6hoc
+       - EMAIL_PASS="cqaa rzet cysx mbfs"
+       - EMAIL_USER=rajatjangra940@gmail.com
+       - FORGET_PASSWORD_TOKEN_EXPIR=10M
+       - FORGET_PASSWORD_TOKEN_SECRET=!@
+       - OWNER_EMAIL=rajat@gmail.com
+       - PORT=8000
+       - RAZORPAY_KEY_ID=rzp_test_S8865NFeX7tt8W
+       - RAZORPAY_KEY_SECRET=fj2mQf1hy0m6JRQ6ehkfpPQQ
+       - RAZORPAY_WEBHOOK_SECRET=urwB429c9mRf_iX
+       - REFRESH_TOKEN_EXPIR=7D
+       - REFRESH_TOKEN_SECRET=*&^%$
+       - VITE_RAZORPAY_KEY_ID=rzp_test_S8865NFeX7tt8W
+
+    networks:
+      - rahi-e-commers
+
+volumes:
+  mongo-data:
+  rahi-e-commers:
+
+networks:
+  rahi-e-commers:
+
+ubuntu@ip-172-31-31-61:~$ touch docker-compose-english-app.yml
+ubuntu@ip-172-31-31-61:~$ vi 
+.bash_history                   .cache/                         .viminfo                        
+.bash_logout                    .profile                        docker-compose-english-app.yml  
+.bashrc                         .ssh/                           docker-compose.yml              
+ubuntu@ip-172-31-31-61:~$ vi docker-compose-english-app.yml 
+
+[1]+  Stopped                    vi docker-compose-english-app.yml
+ubuntu@ip-172-31-31-61:~$ vi docker-compose-english-app.yml 
+ubuntu@ip-172-31-31-61:~$ cat docker-compose.yml 
+services:
+  server:
+    image: jangrarajat/english-learning-app:v1
+    container_name: english-app-server
+    ports:
+      - "8000:8000"
+    volumes: 
+      - english-app:/app/data 
+    environment:
+       - MONGO_URI=mongodb+srv://rajatjangra9694:TH5YJubpJMBZ7OvT@clusterone.axu2z4n.mongodb.net/verb-challenge
+       - JWT_SECRET=your_jwt_secret_key_here_change_in_production
+       - CLIENT_URL=http://localhost:5173
+       - NODE_ENV=development
+
+    networks:
+      - english-app
+
+volumes:
+  english-app:
+
+networks:
+  english-app:

@@ -5,8 +5,9 @@ import helmet from 'helmet';
 import compression from 'compression';
 import morgan from 'morgan';
 import dotenv from 'dotenv';
-import path from 'path'
+import path from 'path';
 import { fileURLToPath } from 'url';
+
 // ==================== Routes Imports ====================
 import authRoutes from './routes/authRoutes.js';
 import courseRoutes from './routes/courseRoutes.js';
@@ -32,8 +33,6 @@ const app = express();
 
 // ==================== Trust Proxy (for rate limiting behind proxies) ====================
 app.set('trust proxy', 1);
-// app.use(express.static(path.join(_dirname , 'public')))
-app.use(express.static(path.join(__dirname, 'public')));
 
 // ==================== Security Middleware ====================
 app.use(helmet({
@@ -59,18 +58,9 @@ const allowedOrigins = [
 
 app.use(cors({
   origin: (origin, callback) => {
-    // Allow requests with no origin (mobile apps, Postman, etc.)
     if (!origin) return callback(null, true);
-
-    if (allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    }
-
-    // Allow in development
-    if (process.env.NODE_ENV === 'development') {
-      return callback(null, true);
-    }
-
+    if (allowedOrigins.includes(origin)) return callback(null, true);
+    if (process.env.NODE_ENV === 'development') return callback(null, true);
     console.warn(`⚠️  CORS blocked origin: ${origin}`);
     return callback(new Error('Not allowed by CORS'));
   },
@@ -79,15 +69,14 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
   exposedHeaders: ['Set-Cookie'],
   optionsSuccessStatus: 200,
-  maxAge: 86400 // 24 hours
+  maxAge: 86400
 }));
 
 // ==================== Compression Middleware ====================
 app.use(compression({
   level: 6,
-  threshold: 1024, // Only compress responses > 1KB
+  threshold: 1024,
   filter: (req, res) => {
-    // Don't compress if client explicitly says not to
     if (req.headers['x-no-compression']) return false;
     return compression.filter(req, res);
   }
@@ -104,7 +93,6 @@ app.use(cookieParser());
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 } else {
-  // Production: log to combined format
   app.use(morgan('combined'));
 }
 
@@ -153,20 +141,19 @@ app.use('/api/progress', progressRoutes);
 app.use('/api/achievements', achievementRoutes);
 app.use('/api/admin', adminRoutes);
 
-// ==================== Root Route ====================
-app.get('/', (req, res) => {
-  res.status(200).json({
-    success: true,
-    message: '📚 30-Day English Verb Challenge API',
-    description: 'Learn 120 English verbs in 30 days',
-    version: '1.0.0',
-    status: 'Running',
-    environment: process.env.NODE_ENV || 'development'
+// ==================== Frontend Static Files Setup ====================
+// Adjust path according to your folder structure (pointing to client/dist from server/src)
+const frontendDistPath = path.join(__dirname, '../../client/dist');
+app.use(express.static(frontendDistPath));
+
+// ==================== SPA Catch-All Route ====================
+app.get(/(.*)/, (req, res) => {
+  res.sendFile(path.join(frontendDistPath, 'index.html'), (err) => {
+    if (err) {
+      res.status(500).send(err);
+    }
   });
 });
-
-// ==================== 404 Handler ====================
-app.use(notFound);
 
 // ==================== Global Error Handler ====================
 app.use(errorHandler);
