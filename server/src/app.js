@@ -5,7 +5,8 @@ import helmet from 'helmet';
 import compression from 'compression';
 import morgan from 'morgan';
 import dotenv from 'dotenv';
-
+import path from 'path'
+import { fileURLToPath } from 'url';
 // ==================== Routes Imports ====================
 import authRoutes from './routes/authRoutes.js';
 import courseRoutes from './routes/courseRoutes.js';
@@ -20,6 +21,9 @@ import adminRoutes from './routes/adminRoutes.js';
 import { errorHandler, notFound } from './middleware/errorHandler.js';
 import { apiLimiter } from './middleware/rateLimiter.js';
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 // ==================== Load Environment Variables ====================
 dotenv.config();
 
@@ -28,6 +32,8 @@ const app = express();
 
 // ==================== Trust Proxy (for rate limiting behind proxies) ====================
 app.set('trust proxy', 1);
+// app.use(express.static(path.join(_dirname , 'public')))
+app.use(express.static(path.join(__dirname, 'public')));
 
 // ==================== Security Middleware ====================
 app.use(helmet({
