@@ -1,44 +1,20 @@
 import dotenv from 'dotenv';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import express from 'express';
 import app from './src/app.js';
 import { connectDB } from './src/config/database.js';
-
-// ==================== ES Modules __dirname Polyfill ====================
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 // ==================== Load Environment Variables ====================
 dotenv.config();
 
 // ==================== Get Port from Environment ====================
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 8000;
 const NODE_ENV = process.env.NODE_ENV || 'development';
-
-// ==================== Frontend Static Files Setup ====================
-const frontendDistPath = path.join(__dirname, '../client/dist'); 
-
-// Express ko static files serve karne ke liye configure karein
-app.use(express.static(frontendDistPath));
-
-// React Router / SPA ke liye catch-all route (Using RegExp to prevent path-to-regexp errors)
-app.get(/(.*)/, (req, res) => {
-  res.sendFile(path.join(frontendDistPath, 'index.html'), (err) => {
-    if (err) {
-      res.status(500).send(err);
-    }
-  });
-});
 
 // ==================== Start Server Function ====================
 const startServer = async () => {
   try {
-    // Connect to MongoDB
     await connectDB();
     console.log('✅ MongoDB connected successfully');
 
-    // Start Express server
     const server = app.listen(PORT, () => {
       console.log('');
       console.log('═══════════════════════════════════════════════');
@@ -52,41 +28,20 @@ const startServer = async () => {
       console.log('');
     });
 
-    // ==================== Graceful Shutdown ====================
     const gracefulShutdown = (signal) => {
       console.log(`\n⚠️  ${signal} received. Shutting down gracefully...`);
-      
       server.close(() => {
         console.log('✅ HTTP server closed');
         process.exit(0);
       });
-
-      // Force shutdown after 10 seconds
       setTimeout(() => {
         console.error('❌ Forced shutdown after timeout');
         process.exit(1);
       }, 10000);
     };
 
-    // Handle shutdown signals
     process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
     process.on('SIGINT', () => gracefulShutdown('SIGINT'));
-
-    // Handle unhandled rejections
-    process.on('unhandledRejection', (reason, promise) => {
-      console.error('❌ Unhandled Rejection at:', promise, 'reason:', reason);
-      // Don't exit in development for hot reload
-      if (NODE_ENV === 'production') {
-        server.close(() => process.exit(1));
-      }
-    });
-
-    // Handle uncaught exceptions
-    process.on('uncaughtException', (error) => {
-      console.error('❌ Uncaught Exception:', error);
-      console.error('Shutting down...');
-      server.close(() => process.exit(1));
-    });
 
     return server;
   } catch (error) {
@@ -96,8 +51,6 @@ const startServer = async () => {
   }
 };
 
-// ==================== Start the Server ====================
 startServer();
 
-// ==================== Export for Testing ====================
 export default startServer;

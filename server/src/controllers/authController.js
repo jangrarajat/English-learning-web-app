@@ -11,10 +11,12 @@ const generateToken = (id) => {
 
 // ==================== Helper: Set Cookie ====================
 const setTokenCookie = (res, token) => {
+  const isProduction = process.env.NODE_ENV === 'production';
+ console.log(isProduction)
   res.cookie('token', token, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
+    secure: isProduction, // Production mein true (HTTPS ke liye), Development mein false (HTTP ke liye)
+    sameSite: isProduction ? 'none' : 'lax',
     maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days
   });
 };
@@ -229,8 +231,8 @@ export const forgotPassword = async (req, res) => {
     const user = await User.findOne({ email: email.toLowerCase() });
     if (!user) {
       // Don't reveal if user exists for security
-      return res.status(200).json({ 
-        message: 'If an account exists with this email, a reset link has been sent' 
+      return res.status(200).json({
+        message: 'If an account exists with this email, a reset link has been sent'
       });
     }
 
